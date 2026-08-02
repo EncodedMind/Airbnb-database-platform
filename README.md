@@ -1,32 +1,25 @@
 # Airbnb-Style Database Platform
 
-University project for the course *Database Design and Use* (Spring Semester 2025). The repository combines two sequential deliverables into one cohesive full-stack database project:
+An end-to-end database project for an Airbnb-like accommodation service.
 
-1. Phase 1 designs the database schema and ER model for an Airbnb-like platform.
-2. Phase 2 implements a Bottle-based web application in Python that queries the same MySQL database and exposes the course requirements through a local web UI.
+This repository brings together the conceptual database design, the provided MySQL database, the Python application logic, and a lightweight Bottle-based web interface into one cohesive system. The `workbench.mwb` file documents and visualizes the ER model, the `Airbnb.sql` file provides the database used by the project, and the Python layer implements the SQL-driven functionality that demonstrates how the model operates in practice.
 
-The result is a complete end-to-end example of database modeling, SQL schema design, application logic, and lightweight web presentation working together on a single domain.
+## Overview
 
-## Tech Stack
+The project models the core workflow of a short-term rental platform. Users can act as hosts and guests, browse and list properties, make bookings, leave reviews, manage wishlists, and receive recommendations. The database captures the structure of that domain, while the application layer executes the queries and business logic that make the system usable.
 
-- MySQL
-- MySQL Workbench
-- Python 3
-- Bottle web framework
-- PyMySQL
-- HTML
+The repository is organized around three practical parts:
+
+- Database design and ER visualization
+- Application logic and SQL queries
+- Web pages used to test and display results locally
 
 ## Repository Structure
 
 ```text
 .
-├── database/
-│   ├── er-model/
-│   │   └── workbench.mwb
-│   ├── schema/
-│   │   └── DB.sql
-│   └── documentation/
-│       └── readme.txt
+├── er-model/
+│   └── workbench.mwb
 ├── app/
 │   ├── app.py
 │   ├── sql/
@@ -35,85 +28,54 @@ The result is a complete end-to-end example of database modeling, SQL schema des
 │   └── web/
 │       ├── index.html
 │       └── forms.html
-├── docs/
-│   ├── README-assignment-notes.md
-│   ├── assignment-1.pdf
-│   └── assignment-2.pdf
-├── .gitignore
 └── README.md
 ```
 
-### Suggested Mapping From the Current Repository
-
-- `1/` becomes `database/`
-- `2/` becomes `app/`
-- The root `README.md` becomes the primary project documentation
-- The application-specific notes currently in `2/README.md` can be preserved as a supporting document under `docs/`
-- The original assignment PDFs are preserved under `docs/`
-
 ## Architecture
 
-This project is organized as a two-phase pipeline:
+The project starts with the ER model in `er-model/workbench.mwb`, which captures the structure of the Airbnb-style domain. That model defines the entities and relationships that the rest of the project relies on.
 
-**Phase 1: Database Design**
+The database itself is provided in `app/sql/Airbnb.sql`. The Python application in `app/app.py` connects to that database and implements the SQL-based operations required by the project. These include property checks, host ranking, property filtering, review-text analysis, guest similarity queries, host-value analysis, and a recommendation algorithm.
 
-The first assignment defines the conceptual and logical model of the platform. It includes the ER design, the MySQL schema, and the assumptions used to model users, hosts, guests, properties, bookings, payments, reviews, wishlists, discounts, amenities, and rules.
+The Bottle entry point in `app/website.py` exposes the functionality through local routes, while the HTML files in `app/web/` provide a simple browser interface for submitting parameters and inspecting the results.
 
-**Phase 2: Application Logic and Frontend**
+## Main Features
 
-The second assignment consumes the schema produced in Phase 1 and implements a small 3-tier web application:
+### Database Model
 
-- Presentation layer: HTML pages served from `web/`
-- Application layer: Python logic in `app.py`
-- Data layer: MySQL database initialized from the Phase 1 schema
-
-The Bottle server defined in `website.py` routes requests from the browser to Python functions, which in turn execute SQL queries through PyMySQL. In practice, the database design determines what the application can query, while the application demonstrates the business use of that schema.
-
-## Features
-
-### Database Design
-
-- ER model for an Airbnb-like platform
-- Entities for users, hosts, guests, properties, bookings, payments, reviews, wishlists, facilities, rules, discounts, and supporting relationships
-- SQL schema generation for MySQL
-- Design assumptions documented in the assignment notes
+- Airbnb-style schema covering users, hosts, guests, properties, bookings, payments, reviews, wishlists, facilities, rules, discounts, and related entities
+- Primary keys, foreign keys, and junction tables that preserve relational integrity
+- A model focused on realistic SQL querying rather than a simplified demo schema
 
 ### Application Logic
 
-The Python application implements the following course requirements:
-
-- `checkIfPropertyExists` checks whether a property of a given type exists in a given location and returns a simple yes/no result.
-- `selectTopNhosts` finds the top `N` hosts for each property type by number of listings.
-- `findMatchingProperties` identifies properties that match a guest’s wishlist amenities, booking history rules, and host-exclusion constraints.
-- `countWordsForProperties` filters properties by booking and wishlist conditions, then performs word-frequency analysis over review text while ignoring stop words.
-- `findCommonPropertiesAndGuests` finds shared properties between two guests and returns the related guest/property combination.
-- `highValueHost` evaluates properties belonging to high-value hosts and guests using nested SQL aggregation.
-- `recommendProperty` computes a weighted recommendation score using amenity preferences, rating, and price, then creates or updates a wishlist entry for the best match.
+- `checkIfPropertyExists` checks whether a property of a given type exists in a given location.
+- `selectTopNhosts` returns the top `N` hosts for each property type based on listing count.
+- `findMatchingProperties` filters properties using wishlist amenities, booking history rules, and host-exclusion constraints.
+- `countWordsForProperties` identifies qualifying properties and performs frequency analysis on review text after removing stop words.
+- `findCommonPropertiesAndGuests` finds overlapping property history between two guests.
+- `highValueHost` evaluates high-value properties and aggregates amenity frequency with nested SQL logic.
+- `recommendProperty` computes a weighted recommendation score using amenities, price, and rating, then stores the best match in a wishlist when appropriate.
 
 ### Web Interface
 
-- Local Bottle server on `http://localhost:8080`
-- HTML form-based interface for submitting query parameters
-- Server-side rendering of query results as HTML tables
+- Local Bottle server for browser-based testing
+- HTML forms for submitting query parameters
+- Server-rendered tables for displaying query results
+- A lightweight presentation layer intended for demonstration and validation
 
 ## Installation & Setup
 
-### 1. Create and load the database
+### 1. Restore the database
 
-1. Start MySQL locally.
-2. Create a database for the project, for example:
+1. Start a local MySQL server.
+2. Import `app/sql/Airbnb.sql` into a MySQL database using MySQL Workbench or another SQL client.
+3. Make sure the database name used locally matches the value configured in `app/app.py`.
+4. If necessary, update the `database` field in `app/app.py` so it points to your local MySQL database.
 
-   ```sql
-   CREATE DATABASE new_airbnb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   ```
+### 2. Configure the Python connection
 
-3. Open `database/schema/DB.sql` in MySQL Workbench or your preferred SQL client.
-4. Execute the file against the newly created database.
-5. Verify that all tables, keys, and relationships were created successfully.
-
-### 2. Configure the Python application
-
-Open `app/app.py` and update the database connection settings near the top of the file:
+Open `app/app.py` and update the database connection settings near the top of the file if needed:
 
 ```python
 db_config = {
@@ -124,26 +86,19 @@ db_config = {
 }
 ```
 
-Make sure the `database` value matches the schema you created in MySQL.
+The application expects a local MySQL database that contains the imported `Airbnb.sql` data.
 
 ### 3. Install dependencies
 
-Create and activate a virtual environment, then install the required packages:
+Install the required Python packages:
 
 ```bash
 pip install bottle pymysql
 ```
 
-If you prefer a requirements file, you can add one with:
-
-```text
-bottle
-pymysql
-```
-
 ### 4. Run the application
 
-Start the Bottle server from the application directory:
+Start the Bottle server from the `app/` directory:
 
 ```bash
 python website.py
@@ -155,16 +110,4 @@ Then open:
 http://localhost:8080
 ```
 
-The root page serves the frontend UI, while the routes in `website.py` expose the implemented SQL-driven functions.
-
-## Notes
-
-- The project was developed as part of a university assignment and therefore emphasizes correctness, explicit SQL logic, and traceable design decisions.
-- The application is intended for local execution only.
-- The Phase 2 implementation depends on the schema generated in Phase 1.
-
-## Credits
-
-- Developers: Δημήτριος Ανδρεάκης and Σταματίνα Ναδάλη
-- Course: Database Design and Use
-- Semester: Spring 2025
+The root page serves the browser UI, and the routes exposed by `website.py` forward requests to the Python functions in `app.py`.
